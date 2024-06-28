@@ -1,4 +1,4 @@
-package org.example.repository.qeuries;
+package org.example.repository.queries;
 
 public enum SqlGenreQueries {
     CREATE("INSERT INTO genres (name, description) VALUES(?,?) RETURNING id"),
@@ -12,6 +12,4 @@ public enum SqlGenreQueries {
     SqlGenreQueries(String query) {
         this.query = query;
     }
-
-
 }

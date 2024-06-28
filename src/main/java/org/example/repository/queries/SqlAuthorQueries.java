@@ -1,4 +1,4 @@
-package org.example.repository.qeuries;
+package org.example.repository.queries;
 
 public enum SqlAuthorQueries {
     CREATE("INSERT INTO authors (name, bio) VALUES(?,?)"),

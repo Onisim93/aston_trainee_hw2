@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.example.repository.qeuries.SqlBookQueries.*;
+import static org.example.repository.queries.SqlBookQueries.*;
 
 public class BookRepositoryImpl implements BookRepository {
 
