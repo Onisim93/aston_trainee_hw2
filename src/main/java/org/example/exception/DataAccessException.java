@@ -1,17 +1,9 @@
 package org.example.exception;
 
+/**
+ * Exception thrown when there is an error accessing data from the database.
+ */
 public class DataAccessException extends RuntimeException{
-    public DataAccessException() {
-        super();
-    }
-
-    public DataAccessException(String message) {
-        super(message);
-    }
-
-    public DataAccessException(String message, Throwable cause) {
-        super(message, cause);
-    }
 
     public DataAccessException(Throwable cause) {
         super(cause);

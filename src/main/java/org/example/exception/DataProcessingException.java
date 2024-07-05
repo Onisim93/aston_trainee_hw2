@@ -1,5 +1,8 @@
 package org.example.exception;
 
+/**
+ * Exception thrown when there is an error processing data in the database.
+ */
 public class DataProcessingException extends RuntimeException{
     public DataProcessingException() {
 

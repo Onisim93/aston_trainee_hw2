@@ -1,5 +1,8 @@
 package org.example.exception;
 
+/**
+ * Helper class for generating exception messages with additional context information.
+ */
 public class ExceptionMessageHelper {
 
     public static final String ERROR_WHILE_CLOSING_RESULT_SET_MSG = "Error occurred while closing ResultSet";

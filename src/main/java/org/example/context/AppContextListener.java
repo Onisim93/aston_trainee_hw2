@@ -22,11 +22,19 @@ import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Enumeration;
-
+/**
+ * Application context listener that initializes services and stores them in servlet context.
+ */
 @Slf4j
 @WebListener
 public class AppContextListener implements ServletContextListener {
 
+    /**
+     * Initializes services and stores them in servlet context.
+     * This method is called when the application is starting up.
+     *
+     * @param sce The ServletContextEvent containing the ServletContext that is being initialized
+     */
     @Override
     public void contextInitialized(ServletContextEvent sce) {
 
