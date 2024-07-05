@@ -6,15 +6,19 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.util.List;
+import java.util.Objects;
 
-
+/**
+ * Represents a book entity.
+ * This class holds information about a book, including his id, title, description, published_date, isbn, author and genres.
+ */
 @Getter
 @Setter
 @RequiredArgsConstructor
-@ToString
+@ToString(exclude = {"author", "genres"})
 public class BookEntity implements BaseEntity<Integer> {
     /**
-     * ID - primary key
+     * The unique identifier of the book.
      */
     private Integer id;
 
@@ -30,6 +34,7 @@ public class BookEntity implements BaseEntity<Integer> {
 
     /**
      * Дата выхода книги
+     * * Пр. 18 июня 1991 / 18.06.1991
      */
     private String publishedDate;
 
@@ -49,6 +54,19 @@ public class BookEntity implements BaseEntity<Integer> {
      * Жанры, связь ManyToMany
      */
     private List<GenreEntity> genres;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BookEntity that = (BookEntity) o;
+        return Objects.equals(id, that.id) && Objects.equals(title, that.title) && Objects.equals(description, that.description) && Objects.equals(publishedDate, that.publishedDate) && Objects.equals(isbn, that.isbn);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, title, description, publishedDate, isbn);
+    }
 
     private BookEntity(BookEntityBuilder builder) {
         this.id = builder.id;

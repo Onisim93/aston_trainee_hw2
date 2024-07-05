@@ -5,39 +5,51 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.util.List;
+import java.util.Objects;
 
+/**
+ * Represents a genre entity.
+ * This class holds information about a genre, including his id, name and description.
+ */
 @Getter
 @Setter
 @RequiredArgsConstructor
 @ToString
 public class GenreEntity implements BaseEntity<Integer> {
     /**
-     * ID - primary key
+     * The unique identifier of the genre.
      */
     private Integer id;
     /**
-     * Название жанра
+     * The name of the genre
      */
     private String name;
     /**
-     * Краткое описание жанра, макс. 1024 символов
+     * The description of the genre. Max length 1024.
      */
     private String description;
-    /**
-     * Список книг данного жанра
-     */
-    private List<BookEntity> books;
 
     private GenreEntity(GenreEntityBuilder builder) {
         this.id = builder.id;
         this.name = builder.name;
         this.description = builder.description;
-        this.books = builder.books;
     }
 
     public static GenreEntityBuilder builder() {
         return new GenreEntityBuilder();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        GenreEntity genre = (GenreEntity) o;
+        return Objects.equals(id, genre.id) && Objects.equals(name, genre.name) && Objects.equals(description, genre.description);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, description);
     }
 
     /**
@@ -47,7 +59,7 @@ public class GenreEntity implements BaseEntity<Integer> {
         private Integer id;
         private String name;
         private String description;
-        private List<BookEntity> books;
+
         public GenreEntityBuilder id(Integer id) {
             this.id = id;
             return this;
@@ -60,10 +72,7 @@ public class GenreEntity implements BaseEntity<Integer> {
             this.description = description;
             return this;
         }
-        public GenreEntityBuilder books(List<BookEntity> books) {
-            this.books = books;
-            return this;
-        }
+
         public GenreEntity build() {
             return new GenreEntity(this);
         }

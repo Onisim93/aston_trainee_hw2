@@ -1,39 +1,35 @@
 package org.example.model;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
-import java.util.List;
-
+/**
+ * Represents an author entity.
+ * This class holds information about an author, including his id, name and biography.
+ */
 @Getter
 @Setter
 @RequiredArgsConstructor
 @ToString
+@EqualsAndHashCode
 public class AuthorEntity implements BaseEntity<Integer> {
     /**
-     * ID - primary key
+     * The unique identifier of the author.
      */
     private Integer id;
     /**
-     * ФИО автора
+     * The name of the author.
      */
     private String name;
     /**
-     * Краткая биография автора, макс. 2048 символов
+     * A brief biography of the author. Max length 1024 characters.
      */
     private String bio;
-    /**
-     * Список книг автора
-     */
-    private List<BookEntity> books;
+
 
     private AuthorEntity(AuthorEntityBuilder builder) {
         this.id = builder.id;
         this.name = builder.name;
         this.bio = builder.bio;
-        this.books = builder.books;
     }
 
     public static AuthorEntityBuilder builder() {
@@ -47,7 +43,6 @@ public class AuthorEntity implements BaseEntity<Integer> {
         private Integer id;
         private String name;
         private String bio;
-        private List<BookEntity> books;
 
         public AuthorEntityBuilder id(Integer id) {
             this.id = id;
@@ -61,10 +56,7 @@ public class AuthorEntity implements BaseEntity<Integer> {
             this.bio = bio;
             return this;
         }
-        public AuthorEntityBuilder books(List<BookEntity> books) {
-            this.books = books;
-            return this;
-        }
+
         public AuthorEntity build() {
             return new AuthorEntity(this);
         }

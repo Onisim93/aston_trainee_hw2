@@ -1,3 +1,8 @@
+package org.example;
+
+import org.example.dto.AuthorDto;
+import org.example.dto.BookDto;
+import org.example.dto.GenreDto;
 import org.example.model.AuthorEntity;
 import org.example.model.BookEntity;
 import org.example.model.GenreEntity;
@@ -60,13 +65,89 @@ public class MockTestData {
             .description("Психологический роман — роман, центральное внимание в котором уделяется характерам персонажей, их душевным переживаниям и развитию. Сюжет в психологическом романе играет вспомогательную роль для раскрытия характеров героев, их трансформации и движений души.")
             .build();
 
-    public static final List<GenreEntity> allGenres = List.of(genre1, genre2, genre3, genre4, genre5, genre6, genre7, genre8, genre9);
+    public static final GenreEntity genre10 = GenreEntity.builder()
+            .id(10)
+            .name("Фэнтези")
+            .description("«фантазия»; по-русски слово «фэнтези» употребляется то в женском, то в среднем роде[2]) — жанр современного искусства, разновидность фантастики. Произведения жанра фэнтези основываются на мифологических и сказочных мотивах, переосмысленных или переработанных авторами.")
+            .build();
+
+    public static final Integer newGenreId = 11;
+    public static final GenreEntity newGenre = GenreEntity.builder()
+            .name("Фантастика")
+            .description("Фантастика – это любая история, в которой автор нарушил законы реального мира. Например, предположил существование невероятных технологий, удивительных планет или незнакомых форм жизни. Фантастика появилась во времена больших открытий.")
+            .build();
+
+    public static final GenreDto newGenreDto = new GenreDto("Фантастика",  "Фантастика – это любая история, в которой автор нарушил законы реального мира. Например, предположил существование невероятных технологий, удивительных планет или незнакомых форм жизни. Фантастика появилась во времена больших открытий.");
+
+
+    public static final GenreEntity newGenreCreated = GenreEntity.builder()
+            .id(newGenreId)
+            .name("Фантастика")
+            .description("Фантастика – это любая история, в которой автор нарушил законы реального мира. Например, предположил существование невероятных технологий, удивительных планет или незнакомых форм жизни. Фантастика появилась во времена больших открытий.")
+            .build();
+
+    public static final GenreDto newGenreCreatedDto = new GenreDto(newGenreId,"Фантастика",  "Фантастика – это любая история, в которой автор нарушил законы реального мира. Например, предположил существование невероятных технологий, удивительных планет или незнакомых форм жизни. Фантастика появилась во времена больших открытий.");
+
+    public static final GenreEntity updatedGenre = GenreEntity.builder()
+            .id(9)
+            .name("updated Психологический Роман")
+            .description("updated Психологический роман — роман, центральное внимание в котором уделяется характерам персонажей, их душевным переживаниям и развитию. Сюжет в психологическом романе играет вспомогательную роль для раскрытия характеров героев, их трансформации и движений души.")
+            .build();
+
+    public static final GenreEntity notValidUpdatedGenreData = GenreEntity.builder()
+            .id(9)
+            .build();
+
+    public static final GenreEntity notValidUpdatedGenreId = GenreEntity.builder()
+            .id(99)
+            .name("updated Психологический Роман")
+            .description("updated Психологический роман — роман, центральное внимание в котором уделяется характерам персонажей, их душевным переживаниям и развитию. Сюжет в психологическом романе играет вспомогательную роль для раскрытия характеров героев, их трансформации и движений души.")
+            .build();
+
+    public static final GenreDto updatedGenreDto = new GenreDto(9, "updated Психологический Роман", "updated Психологический роман — роман, центральное внимание в котором уделяется характерам персонажей, их душевным переживаниям и развитию. Сюжет в психологическом романе играет вспомогательную роль для раскрытия характеров героев, их трансформации и движений души.");
+
+    public static final List<GenreEntity> allGenres = List.of(genre1, genre2, genre3, genre4, genre5, genre6, genre7, genre8, genre9, genre10);
+
+    public static final int newAuthorId = 7;
+
+    public static final AuthorEntity newAuthor = AuthorEntity.builder()
+            .name("Горький Алексей Максимович")
+            .bio("Годы жизни 1868-1936. Горький Алексей Максимович -  русский советский писатель, поэт, прозаик, драматург, журналист и общественный деятель, публицист.")
+            .build();
+
+    public static final AuthorEntity notValidNewAuthor = AuthorEntity.builder().build();
+
+    public static final AuthorEntity newAuthorCreated = AuthorEntity.builder()
+            .id(newAuthorId)
+            .name("Горький Алексей Максимович")
+            .bio("Годы жизни 1868-1936. Горький Алексей Максимович -  русский советский писатель, поэт, прозаик, драматург, журналист и общественный деятель, публицист.")
+            .build();
+    public static final AuthorDto newAuthorDto = new AuthorDto("Горький Алексей Максимович", "Годы жизни 1868-1936. Горький Алексей Максимович -  русский советский писатель, поэт, прозаик, драматург, журналист и общественный деятель, публицист.");
+
+    public static final AuthorDto newAuthorCreatedDto = new AuthorDto(newAuthorId, "Горький Алексей Максимович", "Годы жизни 1868-1936. Горький Алексей Максимович -  русский советский писатель, поэт, прозаик, драматург, журналист и общественный деятель, публицист.");
 
     public static final AuthorEntity author1 = AuthorEntity.builder()
             .id(1)
             .name("Пушкин Александр Сергеевич")
             .bio("Годы жизни 1799-1837. Александр Сергеевич Пушкин - великий русский поэт, драматург и прозаик, считающийся основателем современной русской литературы. Родился в Москве в дворянской семье. Воспитывался в духе европейского Просвещения. Известен своими произведениями, такими как “Евгений Онегин”, “Руслан и Людмила”, “Капитанская дочка”. Пушкин был участником декабристского движения и вел активную литературную и общественную деятельность до своей трагической гибели на дуэли в 1837 году.")
             .build();
+
+    public static final AuthorEntity updatedAuthor = AuthorEntity.builder()
+            .id(1)
+            .name("Пушкин Александр Сергеевич update")
+            .bio("update Годы жизни 1799-1837. Александр Сергеевич Пушкин - великий русский поэт, драматург и прозаик, считающийся основателем современной русской литературы. Родился в Москве в дворянской семье. Воспитывался в духе европейского Просвещения. Известен своими произведениями, такими как “Евгений Онегин”, “Руслан и Людмила”, “Капитанская дочка”. Пушкин был участником декабристского движения и вел активную литературную и общественную деятельность до своей трагической гибели на дуэли в 1837 году.")
+            .build();
+
+    public static final AuthorEntity notValidUpdatedAuthorId = AuthorEntity.builder()
+            .id(100)
+            .name("Пушкин Александр Сергеевич update")
+            .bio("update Годы жизни 1799-1837. Александр Сергеевич Пушкин - великий русский поэт, драматург и прозаик, считающийся основателем современной русской литературы. Родился в Москве в дворянской семье. Воспитывался в духе европейского Просвещения. Известен своими произведениями, такими как “Евгений Онегин”, “Руслан и Людмила”, “Капитанская дочка”. Пушкин был участником декабристского движения и вел активную литературную и общественную деятельность до своей трагической гибели на дуэли в 1837 году.")
+            .build();
+
+    public static final AuthorEntity notValidUpdatedAuthorData = AuthorEntity.builder().id(1).build();
+
+
+    public static final AuthorDto updatedAuthorDto = new AuthorDto(1, "Пушкин Александр Сергеевич update", "update Годы жизни 1799-1837. Александр Сергеевич Пушкин - великий русский поэт, драматург и прозаик, считающийся основателем современной русской литературы. Родился в Москве в дворянской семье. Воспитывался в духе европейского Просвещения. Известен своими произведениями, такими как “Евгений Онегин”, “Руслан и Людмила”, “Капитанская дочка”. Пушкин был участником декабристского движения и вел активную литературную и общественную деятельность до своей трагической гибели на дуэли в 1837 году.");
 
     public static final AuthorEntity author2 = AuthorEntity.builder()
             .id(2)
@@ -92,7 +173,13 @@ public class MockTestData {
             .bio("Годы жизни 1890-1960. Борис Леонидович Пастернак - русский поэт, писатель и переводчик, лауреат Нобелевской премии по литературе 1958 года. Родился в Москве в творческой семье художника и пианистки. Учился в Московском университете. Наибольшую известность получил его роман “Доктор Живаго”, за который он был удостоен Нобелевской премии, но был вынужден отказаться от нее под давлением советских властей. Пастернак также известен своими поэтическими сборниками и переводами классических произведений мировой литературы на русский язык.")
             .build();
 
-    public static final List<AuthorEntity> allAuthors = List.of(author1, author2, author3, author4, author5);
+    public static final AuthorEntity author6 = AuthorEntity.builder()
+            .id(6)
+            .name("Булгаков Михаил Афанасьевич")
+            .bio("Годы жизни 1891-1940. Булгаков Михаил Афанасьевич - русский писатель советского периода, врач, драматург, театральный режиссёр и актёр. Автор романов, повестей, рассказов, пьес, киносценариев и фельетонов, написанных в 1920-е годы.")
+            .build();
+
+    public static final List<AuthorEntity> allAuthors = List.of(author1, author2, author3, author4, author5, author6);
 
     public static final BookEntity book1 = BookEntity.builder()
             .id(1)
@@ -244,6 +331,85 @@ public class MockTestData {
             .genres(List.of(genre7))
             .build();
 
-    public static final List<BookEntity> allBooks = List.of(book1, book2, book3, book4, book5, book6, book7, book8, book9, book10, book11, book12, book13, book14, book15);
+    public static final BookEntity notValidBook = BookEntity.builder().build();
+    public static final GenreEntity notValidGenre = GenreEntity.builder().build();
+    public static final AuthorEntity notValidAuthor = AuthorEntity.builder().build();
 
+
+
+    public static final Integer idForNewBook = 16;
+    public static final BookEntity newBook = BookEntity.builder()
+            .title("Земля NEW")
+            .description("NEW Поэтический сборник, включающий стихи, написанные в разные периоды жизни Пастернака и посвященные разным темам: любви, природе, философии.")
+            .publishedDate("1956")
+            .isbn("978-1810113550")
+            .author(author5)
+            .genres(List.of(genre7, genre2))
+            .build();
+
+    public static final BookDto newBookDto = new BookDto("Земля NEW", "NEW Поэтический сборник, включающий стихи, написанные в разные периоды жизни Пастернака и посвященные разным темам: любви, природе, философии.", "1956", "978-1810113550", author5.getId(), List.of(genre7.getId(), genre2.getId()));
+
+
+    public static final BookEntity newBookCreated = BookEntity.builder()
+            .id(idForNewBook)
+            .title("Земля NEW")
+            .description("NEW Поэтический сборник, включающий стихи, написанные в разные периоды жизни Пастернака и посвященные разным темам: любви, природе, философии.")
+            .publishedDate("1956")
+            .isbn("978-1810113550")
+            .author(author5)
+            .genres(List.of(genre7, genre2))
+            .build();
+
+    public static final BookDto newBookCreatedDto = new BookDto(idForNewBook, "Земля NEW", "NEW Поэтический сборник, включающий стихи, написанные в разные периоды жизни Пастернака и посвященные разным темам: любви, природе, философии.", "1956", "978-1810113550", author5.getId(), List.of(genre7.getId(), genre2.getId()));
+
+    public static final BookEntity updatedBook = BookEntity.builder()
+            .id(15)
+            .title("updated Земля")
+            .description("updated Поэтический сборник, включающий стихи, написанные в разные периоды жизни Пастернака и посвященные разным темам: любви, природе, философии.")
+            .publishedDate("1958")
+            .isbn("978-0817713550")
+            .author(author5)
+            .genres(List.of(genre7, genre3))
+            .build();
+
+    public static final BookEntity notValidUpdatedBookId = BookEntity.builder()
+            .id(150)
+            .title("updated Земля")
+            .description("updated Поэтический сборник, включающий стихи, написанные в разные периоды жизни Пастернака и посвященные разным темам: любви, природе, философии.")
+            .publishedDate("1958")
+            .isbn("978-0817713550")
+            .author(author5)
+            .genres(List.of(genre7, genre3))
+            .build();
+
+    public static final BookEntity notValidUpdatedBookData = BookEntity.builder().id(15).build();
+
+
+    public static final BookDto updatedBookDto = new BookDto(15, "updated Земля", "updated Поэтический сборник, включающий стихи, написанные в разные периоды жизни Пастернака и посвященные разным темам: любви, природе, философии.", "1958", "978-0817713550", author5.getId(), List.of(genre7.getId(), genre3.getId()));
+
+    public static final BookEntity newAuthorBook = BookEntity.builder()
+            .title("Капитанская дочка")
+            .description("Исторический роман (или повесть) Александра Пушкина, действие которого происходит во время восстания Емельяна Пугачёва. Впервые опубликован без указания имени автора в 4-й книжке журнала «Современник», поступившей в продажу в последней декаде 1836 года.")
+            .isbn("9788475251288")
+            .publishedDate("1836")
+            .genres(List.of(genre5))
+            .build();
+
+    public static final BookEntity newAuthorBookCreated = BookEntity.builder()
+            .id(16)
+            .title("Капитанская дочка")
+            .description("Исторический роман (или повесть) Александра Пушкина, действие которого происходит во время восстания Емельяна Пугачёва. Впервые опубликован без указания имени автора в 4-й книжке журнала «Современник», поступившей в продажу в последней декаде 1836 года.")
+            .isbn("9788475251288")
+            .publishedDate("1836")
+            .author(author1)
+            .genres(List.of(genre5))
+            .build();
+
+    public static final BookDto newAuthorBookDto = new BookDto("Капитанская дочка", "Исторический роман (или повесть) Александра Пушкина, действие которого происходит во время восстания Емельяна Пугачёва. Впервые опубликован без указания имени автора в 4-й книжке журнала «Современник», поступившей в продажу в последней декаде 1836 года.", "1836", "9788475251288", List.of(5));
+    public static final BookDto newAuthorBookCreatedDto = new BookDto(16,"Капитанская дочка", "Исторический роман (или повесть) Александра Пушкина, действие которого происходит во время восстания Емельяна Пугачёва. Впервые опубликован без указания имени автора в 4-й книжке журнала «Современник», поступившей в продажу в последней декаде 1836 года.", "1836", "9788475251288", 1, List.of(5));
+
+    public static final List<BookEntity> allBooks = List.of(book1, book2, book3, book4, book5, book6, book7, book8, book9, book10, book11, book12, book13, book14, book15);
+    public static final List<BookEntity> booksForAuthor1 = List.of(book1, book2, book3);
+    public static final List<BookEntity> booksForGenre3 = List.of(book5, book6, book8, book9, book13);
+    public static final List<BookEntity> booksForGenre3AndAuthor2 = List.of(book5, book6);
 }

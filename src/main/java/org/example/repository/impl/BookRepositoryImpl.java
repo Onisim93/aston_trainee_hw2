@@ -1,5 +1,9 @@
 package org.example.repository.impl;
 
+import lombok.extern.slf4j.Slf4j;
+import org.example.exception.DataProcessingException;
+import org.example.exception.EntityNotFoundException;
+import org.example.exception.ExceptionMessageHelper;
 import org.example.model.AuthorEntity;
 import org.example.model.BookEntity;
 import org.example.model.GenreEntity;
@@ -16,32 +20,38 @@ import java.util.Map;
 
 import static org.example.repository.queries.SqlBookQueries.*;
 
+/**
+ * Implementation of the {@link BookRepository} interface.
+ * This class handles CRUD operations for {@link BookEntity} entities in the database.
+ */
+@Slf4j
 public class BookRepositoryImpl implements BookRepository {
 
+    /**
+     * The JDBC connection to be used by the repository for database operations.
+     */
     private final Connection connection;
 
+    /**
+     * Constructs an instance of {@code BookRepositoryImpl} with the specified database connection.
+     * @param connection The JDBC connection to be used by the repository for database operations.
+     */
     public BookRepositoryImpl(Connection connection) {
         this.connection = connection;
     }
 
     @Override
     public BookEntity create(BookEntity entity) {
-        try (
-                PreparedStatement insertBookSt = connection.prepareStatement(CREATE.query);
-                PreparedStatement insertBookGenresSt = connection.prepareStatement(INSERT_GENRE_TO_BOOK_GENRES.query);
-                PreparedStatement insertBookToAuthorBooksSt = connection.prepareStatement(INSERT_BOOK_TO_AUTHOR_BOOKS.query)
-        ) {
+        ResultSet generatedId = null;
+        try (PreparedStatement insertBookSt = connection.prepareStatement(CREATE.query); PreparedStatement insertBookGenresSt = connection.prepareStatement(INSERT_GENRE_TO_BOOK_GENRES.query)) {
             connection.setAutoCommit(false);
 
             fillStatementWithBookFields(insertBookSt, entity);
-            ResultSet generatedId = insertBookSt.executeQuery();
-
+            generatedId = insertBookSt.executeQuery();
+            int bookId = -1;
 
             if (generatedId.next()) {
-                int bookId = generatedId.getInt(1);
-                insertBookToAuthorBooksSt.setInt(1, entity.getAuthor().getId());
-                insertBookToAuthorBooksSt.setInt(2, bookId);
-                insertBookToAuthorBooksSt.executeUpdate();
+                bookId = generatedId.getInt(1);
 
                 insertBookGenresSt.setInt(1, bookId);
                 for (GenreEntity g : entity.getGenres()) {
@@ -49,43 +59,33 @@ public class BookRepositoryImpl implements BookRepository {
                     insertBookGenresSt.addBatch();
                 }
                 insertBookGenresSt.executeBatch();
-
-
-                entity.setId(bookId);
             }
-
             connection.commit();
+
+            return findById(bookId);
+
         } catch (SQLException e) {
             try {
                 connection.rollback();
             } catch (SQLException ex) {
-                ex.printStackTrace();
+                log.warn(ExceptionMessageHelper.ERROR_WHILE_ROLLBACK_TRANSACTION_MSG, ex);
             }
-            throw new RuntimeException(e);
+            throw new DataProcessingException(e.getMessage());
         }
-        return entity;
     }
 
     @Override
     public BookEntity update(BookEntity entity) {
 
-        try (
-                PreparedStatement updateBookSt = connection.prepareStatement(UPDATE.query);
-                PreparedStatement updateAuthorBookSt = connection.prepareStatement(UPDATE_AUTHOR_BOOK.query);
-                PreparedStatement deleteOldBookGenresSt = connection.prepareStatement(DELETE_BOOK_GENRES.query);
-                PreparedStatement insertBookGenresSt = connection.prepareStatement(INSERT_GENRE_TO_BOOK_GENRES.query)) {
+        findById(entity.getId());
+
+        try (PreparedStatement updateBookSt = connection.prepareStatement(UPDATE.query); PreparedStatement deleteOldBookGenresSt = connection.prepareStatement(DELETE_BOOK_GENRES.query); PreparedStatement insertBookGenresSt = connection.prepareStatement(INSERT_GENRE_TO_BOOK_GENRES.query)) {
 
             connection.setAutoCommit(false);
 
             // Обновление основных данных сущности
             fillStatementWithBookFields(updateBookSt, entity);
             updateBookSt.executeUpdate();
-
-            // Обновление связи книги с автором
-
-            updateAuthorBookSt.setInt(1, entity.getAuthor().getId());
-            updateAuthorBookSt.setInt(2, entity.getId());
-            updateAuthorBookSt.executeUpdate();
 
             // Удаление старых связей книги с жанрами
             deleteOldBookGenresSt.setInt(1, entity.getId());
@@ -103,80 +103,163 @@ public class BookRepositoryImpl implements BookRepository {
 
             connection.commit();
 
+            return findById(entity.getId());
+
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            try {
+                connection.rollback();
+            } catch (SQLException ex) {
+                log.warn(ExceptionMessageHelper.ERROR_WHILE_ROLLBACK_TRANSACTION_MSG, ex);
+            }
+            throw new DataProcessingException(e.getMessage());
         }
 
-        return entity;
     }
 
     @Override
     public BookEntity findById(Integer id) {
         Map<Integer, BookEntity> map = new HashMap<>();
-
+        ResultSet resultSet = null;
 
         try (PreparedStatement st = connection.prepareStatement(FIND_BY_ID.query)) {
 
             st.setInt(1, id);
 
-            ResultSet rs = st.executeQuery();
+            resultSet = st.executeQuery();
 
-            while (rs.next()) {
-                BookEntity entity = getBookFromResultSet(rs);
+            if (!resultSet.isBeforeFirst()) {
+                throw new EntityNotFoundException("id");
+            }
+
+
+            while (resultSet.next()) {
+                BookEntity entity = getBookFromResultSet(resultSet);
 
                 if (map.containsKey(id)) {
                     map.get(id).getGenres().addAll(entity.getGenres());
                 } else {
                     map.put(id, entity);
                 }
-
             }
 
+            return map.get(id);
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new DataProcessingException(e.getMessage());
+        } finally {
+            if (resultSet != null) {
+                try {
+                    resultSet.close();
+                } catch (SQLException e) {
+                    log.warn(ExceptionMessageHelper.ERROR_WHILE_CLOSING_RESULT_SET_MSG);
+                }
+            }
         }
-
-        return map.get(id);
     }
 
     @Override
     public List<BookEntity> findAll() {
         Map<Integer, BookEntity> map = new HashMap<>();
+        ResultSet resultSet = null;
+        try (PreparedStatement st = connection.prepareStatement(FIND_ALL.query)) {
+            resultSet = st.executeQuery();
+            fillBooksMapFromResultSet(resultSet, map);
 
-        try (PreparedStatement st = connection.prepareStatement(FIND_ALL.query)
-        ) {
-            ResultSet rs = st.executeQuery();
-
-            while (rs.next()) {
-                BookEntity entity = getBookFromResultSet(rs);
-
-                if (map.containsKey(entity.getId())) {
-                    map.get(entity.getId()).getGenres().addAll(entity.getGenres());
-                } else {
-                    map.put(entity.getId(), entity);
-                }
-
-            }
+            return map.values().stream().toList();
 
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new DataProcessingException(e.getMessage());
+        } finally {
+            if (resultSet != null) {
+                try {
+                    resultSet.close();
+                } catch (SQLException e) {
+                    log.warn(ExceptionMessageHelper.ERROR_WHILE_CLOSING_RESULT_SET_MSG, e);
+                }
+            }
         }
-
-        return map.values().stream().toList();
     }
 
     @Override
-    public void deleteById(Integer id) {
-        try (
-                PreparedStatement deleteBookSt = connection.prepareStatement(DELETE_BY_ID.query);
-                PreparedStatement deleteAuthorBookSt = connection.prepareStatement(DELETE_AUTHOR_BOOK.query);
-                PreparedStatement deleteBookGenresSt = connection.prepareStatement(DELETE_BOOK_GENRES.query);
-        ) {
-            connection.setAutoCommit(false);
-            // Удаление записей из таблицы author_books
-            deleteAuthorBookSt.setInt(1, id);
-            deleteAuthorBookSt.executeUpdate();
+    public List<BookEntity> findByCriteria(Integer authorId, Integer genreId) {
+        Map<Integer, BookEntity> map = new HashMap<>();
+        ResultSet resultSet = null;
+        try (PreparedStatement st = connection.prepareStatement(FIND_BY_CRITERIA.query)) {
+            st.setInt(1, authorId);
+            st.setInt(2, genreId);
 
+            resultSet = st.executeQuery();
+
+            fillBooksMapFromResultSet(resultSet, map);
+
+            return map.values().stream().toList();
+        } catch (SQLException e) {
+            throw new DataProcessingException(e.getMessage());
+        } finally {
+            if (resultSet != null) {
+                try {
+                    resultSet.close();
+                } catch (SQLException e) {
+                    log.warn(ExceptionMessageHelper.ERROR_WHILE_CLOSING_RESULT_SET_MSG, e);
+                }
+            }
+        }
+    }
+
+    @Override
+    public List<BookEntity> findByAuthorId(Integer authorId) {
+        Map<Integer, BookEntity> map = new HashMap<>();
+        ResultSet resultSet = null;
+        try (PreparedStatement st = connection.prepareStatement(FIND_BY_AUTHOR_ID.query)) {
+            st.setInt(1, authorId);
+            resultSet = st.executeQuery();
+
+            fillBooksMapFromResultSet(resultSet, map);
+
+            return map.values().stream().toList();
+
+
+        } catch (SQLException e) {
+            throw new DataProcessingException(e.getMessage());
+        } finally {
+            if (resultSet != null) {
+                try {
+                    resultSet.close();
+                } catch (SQLException e) {
+                    log.warn(ExceptionMessageHelper.ERROR_WHILE_CLOSING_RESULT_SET_MSG, e);
+                }
+            }
+        }
+    }
+
+    @Override
+    public List<BookEntity> findByGenreId(Integer genreId) {
+        Map<Integer, BookEntity> map = new HashMap<>();
+        ResultSet resultSet = null;
+        try (PreparedStatement st = connection.prepareStatement(FIND_BY_GENRE_ID.query)) {
+            st.setInt(1, genreId);
+            resultSet = st.executeQuery();
+            fillBooksMapFromResultSet(resultSet, map);
+            return map.values().stream().toList();
+
+
+        } catch (SQLException e) {
+            throw new DataProcessingException(e.getMessage());
+        } finally {
+            if (resultSet != null) {
+                try {
+                    resultSet.close();
+                } catch (SQLException e) {
+                    log.warn(ExceptionMessageHelper.ERROR_WHILE_CLOSING_RESULT_SET_MSG, e);
+                }
+            }
+        }
+    }
+
+
+    @Override
+    public void deleteById(Integer id) {
+        try (PreparedStatement deleteBookSt = connection.prepareStatement(DELETE_BY_ID.query); PreparedStatement deleteBookGenresSt = connection.prepareStatement(DELETE_BOOK_GENRES.query)) {
+            connection.setAutoCommit(false);
             // Удаление записей из таблицы book_genres
             deleteBookGenresSt.setInt(1, id);
             deleteBookGenresSt.executeUpdate();
@@ -186,9 +269,13 @@ public class BookRepositoryImpl implements BookRepository {
             deleteBookSt.executeUpdate();
 
             connection.commit();
-        }
-        catch (SQLException e) {
-            throw  new RuntimeException();
+        } catch (SQLException e) {
+            try {
+                connection.rollback();
+            } catch (SQLException ex) {
+                log.warn(ExceptionMessageHelper.ERROR_WHILE_ROLLBACK_TRANSACTION_MSG, ex);
+            }
+            throw new DataProcessingException(e.getMessage());
         }
     }
 
@@ -202,34 +289,13 @@ public class BookRepositoryImpl implements BookRepository {
 
         int authorId = rs.getInt("author_id");
         String authorName = rs.getString("author_name");
-        String authorBio = rs.getString("author_bio");
+        AuthorEntity author = AuthorEntity.builder().id(authorId).name(authorName).build();
 
         int genreId = rs.getInt("genre_id");
         String genreName = rs.getString("genre_name");
-        String genreDescription = rs.getString("genre_description");
+        GenreEntity genre = GenreEntity.builder().id(genreId).name(genreName).build();
 
-
-        GenreEntity genre = GenreEntity.builder()
-                .id(genreId)
-                .name(genreName)
-                .description(genreDescription)
-                .build();
-
-        AuthorEntity authorEntity = AuthorEntity.builder()
-                .id(authorId)
-                .name(authorName)
-                .bio(authorBio)
-                .build();
-
-        return BookEntity.builder()
-                .id(bookId)
-                .title(title)
-                .description(description)
-                .isbn(isbn)
-                .publishedDate(publishedDate)
-                .author(authorEntity)
-                .genres(new ArrayList<>(List.of(genre)))
-                .build();
+        return BookEntity.builder().id(bookId).title(title).description(description).isbn(isbn).publishedDate(publishedDate).author(author).genres(new ArrayList<>(List.of(genre))).build();
     }
 
     private void fillStatementWithBookFields(PreparedStatement st, BookEntity entity) throws SQLException {
@@ -252,4 +318,17 @@ public class BookRepositoryImpl implements BookRepository {
             st.setInt(6, entity.getId());
         }
     }
+
+    private void fillBooksMapFromResultSet(ResultSet rs, Map<Integer, BookEntity> map) throws SQLException {
+        while (rs.next()) {
+            BookEntity entity = getBookFromResultSet(rs);
+            if (map.containsKey(entity.getId())) {
+                map.get(entity.getId()).getGenres().addAll(entity.getGenres());
+            } else {
+                map.put(entity.getId(), entity);
+            }
+        }
+    }
+
+
 }

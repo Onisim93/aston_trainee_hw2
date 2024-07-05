@@ -1,42 +1,37 @@
 package org.example.repository.queries;
 
+/**
+ * Enum representing SQL queries related to authors in the database.
+ */
 public enum SqlAuthorQueries {
-    CREATE("INSERT INTO authors (name, bio) VALUES(?,?)"),
+    /**
+     * SQL query to insert a new author into the database.
+     */
+    CREATE("INSERT INTO authors (name, bio) VALUES(?,?) RETURNING id"),
+    /**
+     * SQL query to update an existing author in the database.
+     */
     UPDATE("UPDATE authors SET name = ?, bio = ? WHERE id = ?"),
+    /**
+     * SQL query to delete an author from the database by its ID
+     */
     DELETE_BY_ID("DELETE FROM authors WHERE id = ?"),
-    FIND_BY_ID(getSelectQueryByType("findById")),
-    FIND_BY_NAME(getSelectQueryByType("findByName")),
-    FIND_ALL(getSelectQueryByType("findAll"));
+    /**
+     * SQL query to retrieve an author by its id
+     */
+    FIND_BY_ID("SELECT * FROM authors WHERE id = ?"),
+    /**
+     * SQL query to retrieve all authors
+     */
+    FIND_ALL("SELECT * FROM authors"),;
 
     public final String query;
 
+    /**
+     * Constructs an {@code SqlAuthorQueries} enum with the specified SQL query.
+     * @param query The SQL query string.
+     */
     SqlAuthorQueries(String query) {
         this.query = query;
-    }
-
-    private static String getSelectQueryByType(String type) {
-        String query = """
-                          SELECT a.id AS author_id,
-                          a.name AS author_name,
-                          a.bio AS author_bio,
-                          b.id AS book_id,
-                          b.title AS book_title,
-                          b.description AS book_description,
-                          b.published_date AS book_published_date,
-                          b.isbn AS book_isbn,
-                          g.id AS genre_id,
-                          g.name AS genre_names\s
-                          FROM authors\s
-                          LEFT JOIN books b ON a.id = b.author_ids\s
-                          LEFT JOIN book_genres bg ON b.id = bg.book_ids\s
-                          LEFT JOIN genres g ON bg.genre_id = g.ids\s
-                """;
-        return switch (type) {
-            case "findById" -> query + " WHERE id = ? ORDER BY a.name";
-            case "findAll" -> query + " ORDER BY b.title";
-            case "findByName" -> query + " WHERE name = ? ORDER BY a.name";
-            default -> query;
-        };
-
     }
 }
